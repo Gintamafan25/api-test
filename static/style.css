@@ -1,0 +1,26 @@
+.table1 {
+    border: 1px solid;
+    border-collapse: collapse;
+    align-self: center;
+    margin-left: 25%;
+    margin-right: 25%;
+    text-align: center;
+   
+    
+}
+
+.tr1 {
+    color: blueviolet;
+    border: 1px solid;
+}
+
+.th1 {
+    
+    text-align: center;
+    color: red;
+    
+}
+
+.tr1:hover {
+    color: red;
+}

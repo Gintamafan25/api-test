@@ -1,24 +1,21 @@
 document.addEventListener("DOMContentLoaded", async ()=>{
-    let dataSetOne = await loadData();
+    
     let url_list = await getList();
     
-    
-    let testData = {"tag": "rankings", "rated-ranks": [98,97,94], "number of raters" : 24 }
-   
-    let masterList = []
-    masterLoader(masterList,dataSetOne)
+    await displayList(url_list)
+
+
     
    
    
 })
 
-const url = 'https://api.freeapi.app/api/v1/public/books?page=1&limit=10&inc=kind%2Cid%2Cetag%2CvolumeInfo&query=tech'
-const url2 = "api/books"
+let masterList = []
 
 function masterLoader(masterList,data) {
     masterList.length = 0;
    
-
+   
    
     const layer = 0
     masterList.push({dataType:typeof data, layer: layer, value : data, parent: null})
@@ -55,16 +52,44 @@ function treeWalker(masterList,node, layer, parent) {
 }
 
 function displayList(list) {
+    const mainDiv = document.getElementById("div1")
     const table = document.createElement("table");
     const tableHeaderRow = document.createElement("tr")
     const tableHeader = document.createElement("th")
 
+   
+    table.id = "tb1"
+    table.className = "table1"
+    tableHeaderRow.className = "th1"
+
+    mainDiv.appendChild(table)
+    table.appendChild(tableHeaderRow)
+    tableHeaderRow.appendChild(tableHeader)
+    tableHeader.innerHTML = "Available URLs"
+
+    list.forEach( (a) => {
+        let dataRow = document.createElement("tr")
+        let data = document.createElement("td")
+        
+        table.appendChild(dataRow)
+
+        dataRow.className = "tr1"
+        dataRow.appendChild(data)
+        data.innerHTML = a
+        data.addEventListener("click", async ()=> {
+            
+            const json = await loadData(a)
+            masterLoader(masterList, json)
+            masterListGetter()
+        })
+    })
     
 }
 
-async function loadData() {
+
+async function loadData(url) {
     try {
-        let response = await fetch(url2);
+        let response = await fetch(url);
         if (!response.ok) {
             console.log("HTTP Error:", response.status);
             return [];
@@ -93,4 +118,22 @@ async function getList() {
         console.log("failed to load url lists", e)
         return [];
     }
+}
+
+function masterListGetter() {
+    const traversedList = []
+    if (masterList.length !== 0) {
+        
+
+        masterList.forEach( (a) => {
+            
+            if (!traversedList[a.layer]) {
+                
+                traversedList[a.layer] = []
+            }
+            traversedList[a.layer].push(a)
+        })
+    }
+    
+    console.log(traversedList)
 }
