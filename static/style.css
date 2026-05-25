@@ -2,6 +2,10 @@
     box-sizing: border-box;
 }
 
+body {
+    justify-content: center;
+}
+
 .table1 {
     border: 1px solid;
     border-collapse: collapse;
@@ -30,19 +34,23 @@
 }
 
 .nodeDiv {
-    
-    flex-direction: row;
-    gap: 8px;
-    padding:6 px;
-    border: 1pc solid magenta;
+    padding: 5px;
 
 }
 .div2 {
     display: inline-grid;
-    
+    justify-content: center;
     gap: 8px;
     padding:6 px;
-    border: 1pc solid coral;
+    border: 5px solid coral;
     align-items: center;
+    margin-left: 25%;
+    margin-right: 25%;
+    visibility: hidden;
+    background-color:lightcoral;
+    margin-top: 1%;
+}
 
+.div2:hover {
+    background-color: lightgoldenrodyellow;
 }

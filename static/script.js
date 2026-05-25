@@ -5,11 +5,6 @@ document.addEventListener("DOMContentLoaded", async ()=>{
     let url_list = await getList();
     
     await displayList(url_list)
-
-
-    
-   
-   
 })
 
 let masterList = []
@@ -52,7 +47,6 @@ function treeWalker(masterList,node, layer, parent, key) {
             console.log(e, "error")
         }
     }
-
     return;
 }
 
@@ -83,23 +77,25 @@ function displayList(list) {
         data.innerHTML = a
         data.addEventListener("click", async ()=> {
             const div2 = document.getElementById("div2")
+            div2.style.visibility = "hidden"
+            
 
-            div2.innerHTML = ""
+            
+
+
             const json = await loadData(a)
+            div2.innerHTML = ""
+            div2.style.visibility = "visible"
+
             const normJSON = normalizeJSON(json)
             masterLoader(masterList, normJSON)
             masterListGetter()  
             if (traversedList.length !== 0) {
-                traversedList.forEach((a) => {
-                    a.forEach((b) => {
-                        nodeDisplayer(b)
-                    })
-                })
+                nodeDisplayer(traversedList[0][0])
             }
             
         })
     })
-    
 }
 
 
@@ -110,16 +106,12 @@ async function loadData(url) {
             console.log("HTTP Error:", response.status);
             return [];
         }
-        
         currentURL = url
         return await response.json();
-        
-
     } catch (e) {
         console.log("network error", e)
         return [];
     }
-    
 }
 
 async function getList() {
@@ -129,7 +121,6 @@ async function getList() {
             console.log("HTTP Error:", response.status);
             return []
         }
-
         return await response.json();
     } catch (e) {
         console.log("failed to load url lists", e)
@@ -140,8 +131,6 @@ async function getList() {
 function masterListGetter() {
     traversedList.length = 0
     if (masterList.length !== 0) {
-        
-
         masterList.forEach( (a) => {
             
             if (!traversedList[a.layer]) {
@@ -151,8 +140,6 @@ function masterListGetter() {
             traversedList[a.layer].push(a)
         })
     }
-    
-    
 }
 
 function masterListSetter() {
@@ -168,13 +155,24 @@ function masterListSetter() {
 }
 
 function nodeDisplayer(node) {
-    const div2 = document.getElementById("div2")
-    const nodeDiv = document.createElement("div")
+    
+    let parentDiv = ""
+    if (node.layer === 0) {
+        parentDiv = document.getElementById("div2")
+    } else {
+        parentDiv = document.getElementById(`${masterList.findIndex(item => item === node.parent)}`)
+    }
+    
 
+    const nodeDiv = document.createElement("div")
     const p1 = document.createElement("p")
     const p2 = document.createElement("p")
 
-    div2.appendChild(nodeDiv)
+    
+    parentDiv.appendChild(nodeDiv)
+    nodeDiv.className = "nodeDiv"
+    nodeDiv.id = `${masterList.findIndex(item => item === node)}`
+
 
     nodeDiv.appendChild(p1)
     nodeDiv.appendChild(p2)
@@ -182,20 +180,24 @@ function nodeDisplayer(node) {
     p1.innerHTML = node.key
     p2.innerHTML = node.value
 
-    nodeDiv.className = "nodeDiv"
-
-    nodeDiv.id = `node${node.layer}`
-
-    if (p2.innerHTML)
-
-
-    if (node.layer !== 0) {
-        
-        nodeDiv.hidden = true
+    if (typeof node.value === "object" && node.value !== null) {
+        if (Array.isArray(node.value)) {
+            let size = node.value.length
+            p2.innerHTML = `Array of Size: ${size}`
+        } else {
+            let size = Object.keys(node.value).length
+            p2.innerHTML = `JSON with ${size} keys`
+        } 
     }
-    
-    
-    
+}
+
+function displayManager(clicked_node) { 
+    if (traversedList[clicked_node.layer + 1] !== undefined) {
+        traversedList[clicked_node.layer + 1].forEach((a) => {
+
+        })
+    }
+
 }
 
 function normalizeJSON(response) {
@@ -207,11 +209,8 @@ function normalizeJSON(response) {
             return response[key]
         } 
     }
-
     if (objnum > 1) {
         console.log("multiple parameters")
-        
-        
         for (let x in objres) {
             if (["payload", "result", "data"].includes(objres[x])) {
                 console.log("should be normalized")
@@ -219,7 +218,5 @@ function normalizeJSON(response) {
             }
         }
     }
-
     return response
-
 }
