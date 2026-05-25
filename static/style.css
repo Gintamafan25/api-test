@@ -1,3 +1,7 @@
+* {
+    box-sizing: border-box;
+}
+
 .table1 {
     border: 1px solid;
     border-collapse: collapse;
@@ -23,4 +27,22 @@
 
 .tr1:hover {
     color: red;
+}
+
+.nodeDiv {
+    
+    flex-direction: row;
+    gap: 8px;
+    padding:6 px;
+    border: 1pc solid magenta;
+
+}
+.div2 {
+    display: inline-grid;
+    
+    gap: 8px;
+    padding:6 px;
+    border: 1pc solid coral;
+    align-items: center;
+
 }
