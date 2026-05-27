@@ -173,7 +173,7 @@ function nodeDisplayer(node) {
     nodeDiv.className = "nodeDiv"
     nodeDiv.id = `${masterList.findIndex(item => item === node)}`
 
-
+    nodeDiv.addEventListener("click", displayChildren(node))
     nodeDiv.appendChild(p1)
     nodeDiv.appendChild(p2)
 
@@ -191,14 +191,17 @@ function nodeDisplayer(node) {
     }
 }
 
-function displayManager(clicked_node) { 
-    if (traversedList[clicked_node.layer + 1] !== undefined) {
-        traversedList[clicked_node.layer + 1].forEach((a) => {
+function displayChildren(parentNode) { 
+    if (traversedList[parentNode.layer + 1] !== undefined) {
+        traversedList[parentNode.layer + 1].forEach((a) => {   
+            nodeDisplayer(a);
 
         })
     }
 
 }
+
+
 
 function normalizeJSON(response) {
     const objres = Object.keys(response)
