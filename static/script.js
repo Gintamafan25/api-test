@@ -78,10 +78,16 @@ function displayList(list) {
         data.addEventListener("click", async ()=> {
             const div2 = document.getElementById("div2")
             div2.style.visibility = "hidden"
+            const elements = document.querySelectorAll(".nodeDiv")
+            console.log(elements)
+            if (elements.length > 0) {
+                elements.forEach((a) => {
+                a.remove()
+            })
+            }
             
 
             
-
 
             const json = await loadData(a)
             div2.innerHTML = ""
@@ -95,7 +101,7 @@ function displayList(list) {
             })
             masterListGetter()  
             if (traversedList.length !== 0) {
-                nodeDisplayer(traversedList[0][0])
+                nodeDisplayer(traversedList[0][0], div2)
             }
             
         })
@@ -158,48 +164,74 @@ function masterListSetter() {
     }
 }
 
-function nodeDisplayer(node) {
+function nodeDisplayer(node, parentNode) {
     
     let parentDiv = ""
-    if (node.layer === 0) {
-        parentDiv = document.getElementById("div2")
-    } else {
-        parentDiv = document.getElementById("node-" + masterList.find(item => item === node.parent).id)
-    }
+    parentDiv = parentNode
     
 
     const nodeDiv = document.createElement("div")
+    const childContainer = document.createElement("div")
     const p1 = document.createElement("p")
     const p2 = document.createElement("p")
 
-    console.log(node, "should be parent")
-
+   
+    
     parentDiv.appendChild(nodeDiv)
-    nodeDiv.className = "nodeDiv"
+    
+    
+    
     nodeDiv.id = "node-" + node.id
 
-    nodeDiv.addEventListener("click", displayChildren(node))
+    
     nodeDiv.appendChild(p1)
     nodeDiv.appendChild(p2)
 
     nodeDiv.displayingChildren = false
+    
+    nodeDiv.appendChild(childContainer)
 
-    addEventListener("click", () => {
-        let allChildren = masterList.filter(item => item.parent === node)
+    
+    if (!["boolean", "string", "number"].includes(node.dataType)){
+
+    
+        nodeDiv.addEventListener("click", (e) => {
+            e.stopPropagation()
+            let allChildren = masterList.filter(item => item.parent === node)
+            
+            if (nodeDiv.displayingChildren === false) {
+                nodeDiv.displayingChildren = true
+                nodeDiv.className = "nodeDiv"
+                allChildren.forEach((a) => {
+                    nodeDisplayer(a, childContainer)
+                    
+                })
+
+            } else {
+                nodeDiv.displayingChildren = false
+                nodeDiv.className = "nodeDiv0"
+                allChildren.forEach((a) => {
+                    
+                    const childDiv = document.getElementById("node-" + a.id)
+                    childDiv.remove()
+                })
+                
+
+            }
+        })
         if (nodeDiv.displayingChildren === false) {
-            
-            allChildren.forEach((a) => {
-                nodeDisplayer(a)
-            })
+            nodeDiv.className = "nodeDiv0"
         } else {
-            allChildren.forEach((a) => {
-                const childDiv = document.getElementById("node-" + node.id)
-                childDiv.remove()
-            })
-            
-
+            nodeDiv.className = "nodeDiv"
         }
-    })
+    } else {
+        nodeDiv.addEventListener("click", (e) => {
+            e.stopPropagation()
+        })
+        nodeDiv.classList = "endDiv"
+    }
+    
+
     p1.innerHTML = node.key
     p2.innerHTML = node.value
 
@@ -214,13 +246,6 @@ function nodeDisplayer(node) {
     }
 }
 
-function displayChildren(parentNode) { 
-    return masterList.filter(item => item.parent === parentNode)
-}
-
-function undisplayChildren(parentNode) {
-
-}
 
 
 
@@ -228,16 +253,16 @@ function normalizeJSON(response) {
     const objres = Object.keys(response)
     const objnum = Object.keys(response).length
     if (objnum === 1) {
-        console.log("one parameter")
+        
         if (["payload", "result", "data"].includes(objres[0])) {
             return response[key]
         } 
     }
     if (objnum > 1) {
-        console.log("multiple parameters")
+        
         for (let x in objres) {
             if (["payload", "result", "data"].includes(objres[x])) {
-                console.log("should be normalized")
+                
                 return response[objres[x]]
             }
         }

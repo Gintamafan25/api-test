@@ -1,6 +1,4 @@
-* {
-    box-sizing: border-box;
-}
+
 
 body {
     justify-content: center;
@@ -34,23 +32,40 @@ body {
 }
 
 .nodeDiv {
-    padding: 5px;
+
+    color: blue;
+    background-color: aliceblue;
+    margin-left: 1%;
+    margin-right: 1%;
 
 }
 .div2 {
-    display: inline-grid;
-    justify-content: center;
-    gap: 8px;
-    padding:6 px;
-    border: 5px solid coral;
-    align-items: center;
-    margin-left: 25%;
-    margin-right: 25%;
-    visibility: hidden;
-    background-color:lightcoral;
-    margin-top: 1%;
+   margin-left: 15%;
+   margin-right: 15%;
+   
 }
 
-.div2:hover {
-    background-color: lightgoldenrodyellow;
+
+.nodeDiv0 {
+    background-color: lightcoral;
+    color: whitesmoke;
+    margin-left: 1%;
+    margin-right: 1%;
+}
+
+.nodeDiv0:hover {
+    background-color: lightsalmon;
+}
+
+.endDiv {
+    background-color: azure;
+    color: lightseagreen;
+    margin-left: 1%;
+    margin-right: 1%;
+    
+}
+
+.endDiv:hover {
+    background-color: lightcyan;
+   
 }
