@@ -89,6 +89,10 @@ function displayList(list) {
 
             const normJSON = normalizeJSON(json)
             masterLoader(masterList, normJSON)
+            let counter = 0
+            masterList.forEach((item) => {
+                item.id = counter++
+            })
             masterListGetter()  
             if (traversedList.length !== 0) {
                 nodeDisplayer(traversedList[0][0])
@@ -160,7 +164,7 @@ function nodeDisplayer(node) {
     if (node.layer === 0) {
         parentDiv = document.getElementById("div2")
     } else {
-        parentDiv = document.getElementById(`${masterList.findIndex(item => item === node.parent)}`)
+        parentDiv = document.getElementById("node-" + masterList.find(item => item === node.parent).id)
     }
     
 
@@ -168,15 +172,34 @@ function nodeDisplayer(node) {
     const p1 = document.createElement("p")
     const p2 = document.createElement("p")
 
-    
+    console.log(node, "should be parent")
+
     parentDiv.appendChild(nodeDiv)
     nodeDiv.className = "nodeDiv"
-    nodeDiv.id = `${masterList.findIndex(item => item === node)}`
+    nodeDiv.id = "node-" + node.id
 
 
     nodeDiv.appendChild(p1)
     nodeDiv.appendChild(p2)
 
+    nodeDiv.displayingChildren = false
+
+    addEventListener("click", () => {
+        let allChildren = masterList.filter(item => item.parent === node)
+        if (nodeDiv.displayingChildren === false) {
+            
+            allChildren.forEach((a) => {
+                nodeDisplayer(a)
+            })
+        } else {
+            allChildren.forEach((a) => {
+                const childDiv = document.getElementById("node-" + node.id)
+                childDiv.remove()
+            })
+            
+
+        }
+    })
     p1.innerHTML = node.key
     p2.innerHTML = node.value
 
@@ -191,12 +214,11 @@ function nodeDisplayer(node) {
     }
 }
 
-function displayManager(clicked_node) { 
-    if (traversedList[clicked_node.layer + 1] !== undefined) {
-        traversedList[clicked_node.layer + 1].forEach((a) => {
+function displayChildren(parentNode) { 
+    return masterList.filter(item => item.parent === parentNode)
+}
 
-        })
-    }
+function undisplayChildren(parentNode) {
 
 }
 
