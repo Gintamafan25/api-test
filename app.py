@@ -1,13 +1,25 @@
-from flask import Flask,render_template, jsonify
+from flask import Flask,render_template, jsonify, json
 import requests
-
+import os
+import csv
+from datetime import datetime
 app = Flask(__name__)
 
 url = 'https://api.freeapi.app/api/v1/public/books?page=1&limit=10&inc=kind%2Cid%2Cetag%2CvolumeInfo&query=tech'
 url2 = "https://dashboard.elering.ee/api/nps/price/EE/current"
 url3 = "https://official-joke-api.appspot.com/random_joke"
 
-url_list = [url,url2,url3]
+
+
+all_nasdaq_dict = {}
+
+with open("nasdaq_data.json", "r") as f:
+    all_nasdaq_dict = json.load(f)
+
+@app.route("/financial_data")
+def get_finance_data():
+    return jsonify(dict(list(all_nasdaq_dict.items())[:10]))
+
 @app.route("/")
 def index():
     return render_template("index.html")

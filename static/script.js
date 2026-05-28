@@ -1,21 +1,50 @@
 
 
 document.addEventListener("DOMContentLoaded", async ()=>{
+    currentURL = "/financial_data"
     
-    let url_list = await getList();
-    
-    await displayList(url_list)
+    let data1 =  await loadData(currentURL)
+   
+    await renderChart(data1)
+
 })
 
 let masterList = []
 let traversedList = []
 let currentURL = ""
+let chart;
+
+async function renderChart(data) {  
+    let row = Object.values(data)[0].slice(-1000)
+    
+    const labels = row.map(d => d.date)
+    const prices = row.map(d => d.close)
+
+    const ctx = document.getElementById("myChart")
+
+    if (chart) {
+        chart.destroy()
+    }
+
+    chart = new Chart(ctx, {
+        type: "line",
+        data: {
+            labels: labels,
+            datasets: [{label: "price",
+                data: prices
+            }]
+        }
+    })
+
+
+
+}
 
 function masterLoader(masterList,data) {
     masterList.length = 0;
    
    
-    console.log(data)
+    
     const layer = 0
     const key = 0
     masterList.push({dataType:typeof data, layer: layer, value : data, parent: null, key: currentURL})
@@ -79,7 +108,7 @@ function displayList(list) {
             const div2 = document.getElementById("div2")
             div2.style.visibility = "hidden"
             const elements = document.querySelectorAll(".nodeDiv")
-            console.log(elements)
+            
             if (elements.length > 0) {
                 elements.forEach((a) => {
                 a.remove()
@@ -99,7 +128,7 @@ function displayList(list) {
             masterList.forEach((item) => {
                 item.id = counter++
             })
-            masterListGetter()  
+            
             if (traversedList.length !== 0) {
                 nodeDisplayer(traversedList[0][0], div2)
             }
@@ -116,7 +145,7 @@ async function loadData(url) {
             console.log("HTTP Error:", response.status);
             return [];
         }
-        currentURL = url
+        
         return await response.json();
     } catch (e) {
         console.log("network error", e)
@@ -138,31 +167,9 @@ async function getList() {
     }
 }
 
-function masterListGetter() {
-    traversedList.length = 0
-    if (masterList.length !== 0) {
-        masterList.forEach( (a) => {
-            
-            if (!traversedList[a.layer]) {
-                
-                traversedList[a.layer] = []
-            }
-            traversedList[a.layer].push(a)
-        })
-    }
-}
 
-function masterListSetter() {
-    if (traversedList.length !== 0) {
-        //need to create a design, that creates a div for layer 0
-        //it displays relevent data for layer zero, including full length
-        //when clicked, it shows all of the layer 1 nodes, you will need relevent information for each node
-        
-        traversedList.forEach((a) => {
 
-        })
-    }
-}
+
 
 function nodeDisplayer(node, parentNode) {
     
