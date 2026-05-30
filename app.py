@@ -1,10 +1,11 @@
-from flask import Flask,render_template, jsonify, json
+from flask import Flask,render_template, jsonify, json, request
 import requests
 import os
 import csv
 from datetime import datetime
+from flask_cors import CORS
 app = Flask(__name__)
-
+CORS(app)
 url = 'https://api.freeapi.app/api/v1/public/books?page=1&limit=10&inc=kind%2Cid%2Cetag%2CvolumeInfo&query=tech'
 url2 = "https://dashboard.elering.ee/api/nps/price/EE/current"
 url3 = "https://official-joke-api.appspot.com/random_joke"
@@ -13,12 +14,12 @@ url3 = "https://official-joke-api.appspot.com/random_joke"
 
 all_nasdaq_dict = {}
 
-with open("nasdaq_data.json", "r") as f:
+with open(".gitignore/nasdaq_data.json", "r") as f:
     all_nasdaq_dict = json.load(f)
 
 @app.route("/financial_data")
 def get_finance_data():
-    return jsonify(dict(list(all_nasdaq_dict.items())[:10]))
+    return jsonify(dict(list(all_nasdaq_dict.items())[:4]))
 
 @app.route("/")
 def index():
@@ -39,5 +40,15 @@ def get_books():
 @app.route("/api/list")
 def get_list():
     return jsonify(url_list)
+
+
+@app.route("/predict", methods=["POST"])
+def compute():
+    range_data = request.get_json()
+    print(range_data)
+    return jsonify({"status": "ok"})
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+   

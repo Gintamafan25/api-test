@@ -4,8 +4,51 @@ document.addEventListener("DOMContentLoaded", async ()=>{
     currentURL = "/financial_data"
     
     let data1 =  await loadData(currentURL)
-   
+    const canvas = document.getElementById("myChart")
     await renderChart(data1)
+
+    let selectionStart = null;
+    let selectionEnd = null;
+
+
+    if (chart) {
+        console.log(chart)
+        canvas.addEventListener("click", async (event) => {
+            const points = chart.getElementsAtEventForMode(
+                event, 
+                "nearest",
+                {intersect: true},
+                false
+            )
+            if (!points.length) return;
+
+            const index = points[0].index
+            if (selectionStart === null) {
+                selectionStart = index
+                console.log("start", index)
+            } else {
+                selectionEnd = index
+                console.log("end:", index)
+
+                const start = Math.min(selectionStart, selectionEnd);
+                const end = Math.max(selectionStart, selectionEnd);
+
+                const selectedData = chart.data.datasets[0].data.slice(start, end + 1);
+                console.log("selected range", selectedData)
+
+                selectionStart = null
+                selectionEnd = null
+                chart.data.datasets[0].pointBackgroundColor[index] = "yellow";
+                chart.update()
+
+                await sendRangeData(selectedData)
+
+
+
+            }
+
+        })
+    }
 
 })
 
@@ -14,8 +57,19 @@ let traversedList = []
 let currentURL = ""
 let chart;
 
+async function sendRangeData(rangeData) {
+    fetch("http://127.0.0.1:5000/predict", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            data: rangeData,
+            periods: 10
+        })
+    })
+}
+
 async function renderChart(data) {  
-    let row = Object.values(data)[0].slice(-1000)
+    let row = Object.values(data)[0].slice(-31)
     
     const labels = row.map(d => d.date)
     const prices = row.map(d => d.close)
@@ -31,7 +85,12 @@ async function renderChart(data) {
         data: {
             labels: labels,
             datasets: [{label: "price",
-                data: prices
+                data: prices,
+                borderColor: "red",
+                pointRadius: 4,
+                pointBackgroundColor: prices.map(() => "green"),    
+                borderWidth: 2,          
+                    
             }]
         }
     })
