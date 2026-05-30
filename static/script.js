@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
     let selectionStart = null;
     let selectionEnd = null;
 
+    
 
     if (chart) {
         console.log(chart)
@@ -36,14 +37,31 @@ document.addEventListener("DOMContentLoaded", async ()=>{
                 const selectedData = chart.data.datasets[0].data.slice(start, end + 1);
                 console.log("selected range", selectedData)
 
+
                 selectionStart = null
                 selectionEnd = null
-                chart.data.datasets[0].pointBackgroundColor[index] = "yellow";
+                chart.data.datasets[0].pointBackgroundColor[index] = "rgba(255, 0, 0, 0.4)";
                 chart.update()
 
-                await sendRangeData(selectedData)
+                const n = selectedData.length;
 
+                let predictionCount;
 
+                if (n < 20) {
+                    predictionCount = 10;
+                } else {
+                    predictionCount = Math.round(n * 0.5);
+                }
+
+                await sendRangeData(selectedData, predictionCount)
+
+                predictedData = await loadData(predictedDataURL)
+                const futureLabels = [];
+
+                const anchorValue = selectedData[selectedData.length - 1];
+                const anchorIndex = end;
+
+                addPrediction(predictedData, anchorIndex, anchorValue)
 
             }
 
@@ -56,25 +74,86 @@ let masterList = []
 let traversedList = []
 let currentURL = ""
 let chart;
+let predictedDataURL = "/prediction_data"
+let predictedData;
+let predictionHistory = []
 
-async function sendRangeData(rangeData) {
-    fetch("http://127.0.0.1:5000/predict", {
+async function sendRangeData(rangeData, predictionCount) {
+    const res = await fetch("http://127.0.0.1:5001/predict", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
             data: rangeData,
-            periods: 10
+            periods: predictionCount
         })
     })
+    return await res.json()
+}
+function addPrediction(predictedData, anchorIndex, anchorValue) {
+
+    // Build prediction dataset
+    const predictionSeries = [
+        ...Array(anchorIndex).fill(null),
+        anchorValue,
+        ...predictedData
+    ];
+
+    // Add dataset
+    chart.data.datasets.push({
+        label: "Prediction",
+        data: predictionSeries,
+        borderColor: "rgba(255, 255, 0, 1)",
+        borderDash: [5, 5],
+        pointRadius: 4,
+        borderwidth: 3
+
+    });
+
+    const datasetIndex = chart.data.datasets.length - 1;
+
+    // Add labels
+    const futureLabels = predictedData.map((_, i) => "Prediction " + (i + 1));
+    chart.data.labels.splice(anchorIndex + 1, 0, ...futureLabels);
+
+    // Track this prediction
+    predictionHistory.push({
+        datasetIndex,
+        startIndex: anchorIndex + 1,
+        length: predictedData.length
+    });
+
+    // If more than 2 predictions exist, remove the oldest
+    if (predictionHistory.length > 2) {
+        const old = predictionHistory.shift();
+
+        // Remove dataset
+        chart.data.datasets.splice(old.datasetIndex, 1);
+
+        // Remove labels
+        chart.data.labels.splice(old.startIndex, old.length);
+
+        // Fix indices
+        predictionHistory = predictionHistory.map(p => ({
+            ...p,
+            datasetIndex: p.datasetIndex - 1
+        }));
+    }
+
+    chart.update();
 }
 
 async function renderChart(data) {  
-    let row = Object.values(data)[0].slice(-31)
+    let row = Object.values(data)[0].slice(100)
     
     const labels = row.map(d => d.date)
     const prices = row.map(d => d.close)
 
     const ctx = document.getElementById("myChart")
+    ctx.width = 2000;   // or dynamic
+    ctx.height = 1000; 
+    
+    
+
 
     if (chart) {
         chart.destroy()
@@ -86,13 +165,26 @@ async function renderChart(data) {
             labels: labels,
             datasets: [{label: "price",
                 data: prices,
-                borderColor: "red",
+                borderColor: "rgba(255, 0, 0, 0.4)",
                 pointRadius: 4,
                 pointBackgroundColor: prices.map(() => "green"),    
-                borderWidth: 2,          
+                borderWidth: 3,          
                     
             }]
+        },
+        options: {
+        maintainAspectRatio: false,
+        responsive: false,
+        scales: {
+            y: {
+                beginAtZero: false,
+                // lock the range based on initial data
+                min: Math.min(...prices),
+                max: Math.max(...prices) * 2
+            }
         }
+    }
+
     })
 
 

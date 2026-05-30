@@ -69,3 +69,12 @@ body {
     background-color: lightcyan;
    
 }
+
+#chartWrapper {
+    width: 100%;
+    overflow-x: auto;   /* enables horizontal scrolling */
+    overflow-y: hidden;
+    white-space: nowrap;
+
+}
+
